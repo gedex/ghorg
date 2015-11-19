@@ -45,7 +45,7 @@ If you're using personal token, set <info>auth_method</info> to <info>token</inf
 
     <info>%command.full_name% auth_method token</info>
 
-Using username and password is NOT encouraged as it will be stored as JSON file.
+Using username and password is NOT encouraged as it will be stored in JSON file.
 EOT
             );
     }
