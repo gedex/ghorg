@@ -1,0 +1,24 @@
+{
+    "name": "gedex/ghorg",
+    "description": "CLI application to get information about organization on GitHub",
+    "type": "application",
+    "require": {
+        "symfony/console": "^2.7",
+        "symfony/dependency-injection": "^2.7",
+        "knplabs/github-api": "^1.5"
+    },
+    "require-dev": {
+        "satooshi/php-coveralls": "^0.6.1"
+    },
+    "autoload": {
+        "psr-4": { "Gedex\\Ghorg\\": "src/Gedex/Ghorg/" }
+    },
+    "bin": ["ghorg"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Akeda Bagus",
+            "email": "admin@gedex.web.id"
+        }
+    ]
+}
