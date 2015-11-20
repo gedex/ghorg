@@ -8,26 +8,29 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class ReposListCommand extends AbstractCommand
+class MembersListCommand extends AbstractCommand
 {
 
-    private $defaultDisplayedFields = array('name', 'description', 'language');
+    private $defaultDisplayedFields = array('id', 'login', 'type', 'site_admin');
 
     public function configure()
     {
         $this
-            ->setName('repos:list')
-            ->setDescription('List of repositories in the organization')
+            ->setName('members:list')
+            ->setDescription('List of members in the organization')
             ->setDefinition(array(
                 new InputArgument('org', InputArgument::REQUIRED, 'GitHub org'),
+                new InputOption('detail', 'd', InputOption::VALUE_NONE, 'Get detailed information on user. Require another API request for each user'),
                 new InputOption('fields', 'f', InputOption::VALUE_REQUIRED, 'Fields to display'),
-                new InputOption('filter', 'F', InputOption::VALUE_REQUIRED, 'Filter the repos'),
+                new InputOption('filter', 'F', InputOption::VALUE_REQUIRED, 'Filter the members'),
                 new InputOption('order', 'o', InputOption::VALUE_REQUIRED, 'Sort order. ASC or DESC'),
-                new InputOption('orderby', 'b', InputOption::VALUE_REQUIRED, 'Order the repos'),
-                new InputOption('limit', 'l', InputOption::VALUE_REQUIRED, 'Limit returned repos'),
+                new InputOption('orderby', 'b', InputOption::VALUE_REQUIRED, 'Order the members'),
+                new InputOption('limit', 'l', InputOption::VALUE_REQUIRED, 'Limit returned members'),
             ))
             ->setHelp(<<<EOT
-List all repositories of an organization.
+List all users who are members of an organization. If you've set <info>auth_method</info>
+in config then both concealed and public members might be displayed if you're
+member of the org too.
 
 <comment>Filter parameters</comment>
 TODO
@@ -56,8 +59,8 @@ EOT
             }
         }
 
-        $orgReposApi = $githubClient->api('organization');
-        $repos = $paginator->fetchAll($orgReposApi, 'repositories', array($org, $this->reposTypeApi));
+        $orgMembersApi = $githubClient->api('organization')->members();
+        $members = $paginator->fetchAll($orgMembersApi, 'all', array($org, null, $this->membersFilterApi));
 
         $fields = $input->getOption('fields');
         if (!empty($fields)) {
@@ -66,18 +69,23 @@ EOT
             $fields = $this->defaultDisplayedFields;
         }
 
+        $detail = $input->getOption('detail');
+
         $rows = array();
-        foreach ($repos as $repo) {
-            $repo = $this->flatten_array($repo);
+        foreach ($members as $member) {
+            if ($detail) {
+                $member = $githubClient->api('user')->show($member['login']);
+            }
+            $member = $this->flatten_array($member);
             $row = array();
             foreach ($fields as $field) {
-                if (!isset($repo[$field])) {
-                    $repo[$field] = '';
+                if (!isset($member[$field])) {
+                    $member[$field] = '';
                 }
-                if (is_bool($repo[$field])) {
-                    $repo[$field] = $repo[$field] ? 'true' : 'false';
+                if (is_bool($member[$field])) {
+                    $member[$field] = $member[$field] ? 'true' : 'false';
                 }
-                $row[$field] = $repo[$field];
+                $row[$field] = $member[$field];
             }
             $rows[] = $row;
         }

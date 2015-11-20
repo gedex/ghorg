@@ -59,10 +59,8 @@ class ApplicationFactory {
     {
         return [
             new Command\ConfigCommand(),
-            //new Command\PeopleListCommand(),
-            //new Command\PeopleFindCommand(),
-            //new Command\ReposListCommand(),
-            //new Command\ReposFindCommand()
+            new Command\MembersListCommand(),
+            new Command\ReposListCommand(),
         ];
     }
 }
